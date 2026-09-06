@@ -177,6 +177,29 @@ legend {
   gap: 14px 12px;
 }
 
+.toggle-row {
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--panel-2);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.toggle-row input {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  accent-color: var(--accent);
+}
+
+.rider-measurements { margin-top: 14px; }
+.rider-measurements[hidden] { display: none; }
+
 label {
   display: grid;
   gap: 6px;
@@ -331,6 +354,37 @@ input {
   stroke: var(--dimension);
   stroke-width: 3;
   stroke-linecap: round;
+}
+
+#bikeCanvas .rider-torso {
+  stroke: #3f6f8f;
+  stroke-width: 38;
+  stroke-linecap: round;
+}
+
+#bikeCanvas .rider-limb,
+#bikeCanvas .rider-neck,
+#bikeCanvas .rider-foot {
+  stroke: #d4aa84;
+  stroke-width: 15;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+#bikeCanvas .rider-foot { stroke-width: 12; }
+#bikeCanvas .rider-neck { stroke-width: 20; }
+#bikeCanvas .rider-far { opacity: 0.42; }
+
+#bikeCanvas .rider-head {
+  fill: #d4aa84;
+  stroke: #f0c59f;
+  stroke-width: 4;
+}
+
+#bikeCanvas .rider-joint {
+  fill: #d4aa84;
+  stroke: #0c1216;
+  stroke-width: 3;
 }
 
 #bikeCanvas .saddle {
