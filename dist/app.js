@@ -167,20 +167,29 @@ function calculate(g) {
   let rider = null;
   if (g.showRider) {
     const hip = { x: saddle.x + 8, y: saddle.y + 22 };
-    const torsoAngle = radians(35);
+    const torsoAngleDegrees = 35;
+    const torsoAngle = radians(torsoAngleDegrees);
+    const torsoDirection = { x: Math.cos(torsoAngle), y: Math.sin(torsoAngle) };
     const shoulder = {
-      x: hip.x + Math.cos(torsoAngle) * g.torsoLength,
-      y: hip.y + Math.sin(torsoAngle) * g.torsoLength,
+      x: hip.x + torsoDirection.x * g.torsoLength,
+      y: hip.y + torsoDirection.y * g.torsoLength,
     };
     const headRadius = Math.max(55, Math.min(90, g.riderHeight * 0.043));
-    const head = { x: shoulder.x - 28, y: shoulder.y + headRadius * 1.55 };
+    const neckTop = {
+      x: shoulder.x + torsoDirection.x * headRadius * 0.62,
+      y: shoulder.y + torsoDirection.y * headRadius * 0.62,
+    };
+    const head = {
+      x: neckTop.x + torsoDirection.x * headRadius * 0.72,
+      y: neckTop.y + torsoDirection.y * headRadius * 0.72,
+    };
     const hand = { x: stemEnd.x + 38, y: stemEnd.y - 20 };
     const upperLeg = g.riderInseam * 0.52;
     const lowerLeg = g.riderInseam * 0.48;
     const nearKnee = bentJoint(hip, drivePedal, upperLeg, lowerLeg, 1);
     const farKnee = bentJoint(hip, farPedal, upperLeg, lowerLeg, 1);
     const elbow = bentJoint(shoulder, hand, g.armLength * 0.52, g.armLength * 0.48, -1);
-    rider = { hip, shoulder, head, headRadius, hand, elbow, nearKnee, farKnee, drivePedal, farPedal };
+    rider = { hip, shoulder, neckTop, head, headRadius, headRotation: 90 - torsoAngleDegrees, hand, elbow, nearKnee, farKnee, drivePedal, farPedal };
   }
   const reach = g.reach;
   const stack = g.stack;
@@ -220,6 +229,11 @@ function line(parent, mapper, a, b, className, extras = {}) {
 function circle(parent, mapper, centre, radius, className, extras = {}) {
   const p = mapper.point(centre);
   return element("circle", { cx: p.x, cy: p.y, r: mapper.length(radius), class: className, ...extras }, parent);
+}
+
+function ellipse(parent, mapper, centre, radiusX, radiusY, className, extras = {}) {
+  const p = mapper.point(centre);
+  return element("ellipse", { cx: p.x, cy: p.y, rx: mapper.length(radiusX), ry: mapper.length(radiusY), class: className, ...extras }, parent);
 }
 
 function text(parent, mapper, point, value, className, extras = {}) {
@@ -309,10 +323,11 @@ function drawRider(mapper, rider) {
   line(layers.rider, mapper, rider.shoulder, rider.elbow, "rider-limb");
   line(layers.rider, mapper, rider.elbow, rider.hand, "rider-limb");
 
-  const neckBase = { x: rider.shoulder.x - 12, y: rider.shoulder.y + 10 };
-  const neckTop = { x: rider.head.x, y: rider.head.y - rider.headRadius * 0.72 };
-  line(layers.rider, mapper, neckBase, neckTop, "rider-neck");
-  circle(layers.rider, mapper, rider.head, rider.headRadius, "rider-head");
+  line(layers.rider, mapper, rider.shoulder, rider.neckTop, "rider-neck");
+  const headPoint = mapper.point(rider.head);
+  ellipse(layers.rider, mapper, rider.head, rider.headRadius * 0.7, rider.headRadius, "rider-head", {
+    transform: `rotate(${rider.headRotation} ${headPoint.x} ${headPoint.y})`,
+  });
 
   for (const joint of [rider.hip, rider.nearKnee, rider.farKnee, rider.elbow]) {
     circle(layers.rider, mapper, joint, 11, "rider-joint");
