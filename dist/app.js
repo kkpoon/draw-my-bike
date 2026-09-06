@@ -18,6 +18,7 @@ const defaults = Object.freeze({
   cockpitSpacer: 0,
   stemRise: 6,
   crankLength: 160,
+  showRider: false,
 });
 
 const bounds = Object.freeze({
@@ -27,16 +28,22 @@ const bounds = Object.freeze({
   cockpitSpacer: [0, 80], stemRise: [-30, 45], crankLength: [120, 220],
 });
 
+const riderBounds = Object.freeze({
+  riderHeight: [1200, 2200], riderInseam: [500, 1100], torsoLength: [350, 800], armLength: [350, 850],
+});
+
 const form = document.querySelector("#geometryForm");
 const resetButton = document.querySelector("#resetButton");
 const svg = document.querySelector("#bikeCanvas");
 const layers = {
   grid: document.querySelector("#gridLayer"),
   dimensions: document.querySelector("#dimensionLayer"),
+  rider: document.querySelector("#riderLayer"),
   bike: document.querySelector("#bikeLayer"),
   labels: document.querySelector("#labelLayer"),
 };
 const drawingError = document.querySelector("#drawingError");
+const riderMeasurements = document.querySelector("#riderMeasurements");
 
 const metricElements = {
   reach: document.querySelector("#metricReach"),
@@ -76,7 +83,39 @@ function readGeometry() {
     valid = false;
   }
 
+  geometry.showRider = form.elements.showRider.checked;
+  riderMeasurements.hidden = !geometry.showRider;
+  form.elements.showRider.setAttribute("aria-expanded", String(geometry.showRider));
+
+  for (const [name, [min, max]] of Object.entries(riderBounds)) {
+    const input = form.elements[name];
+    const value = Number(input.value);
+    const fieldValid = !geometry.showRider || (input.value !== "" && Number.isFinite(value) && value >= min && value <= max);
+    input.setAttribute("aria-invalid", fieldValid ? "false" : "true");
+    if (!fieldValid) valid = false;
+    geometry[name] = value;
+  }
+
   return { geometry, valid };
+}
+
+function bentJoint(start, end, firstLength, secondLength, side) {
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const distance = Math.hypot(dx, dy);
+  if (distance === 0) return { ...start };
+
+  const reachableDistance = Math.min(distance, firstLength + secondLength - 0.001);
+  const along = (firstLength ** 2 - secondLength ** 2 + reachableDistance ** 2) / (2 * reachableDistance);
+  const bend = Math.sqrt(Math.max(0, firstLength ** 2 - along ** 2));
+  const unit = { x: dx / distance, y: dy / distance };
+  const centre = { x: start.x + unit.x * along, y: start.y + unit.y * along };
+  const perpendicular = { x: -unit.y, y: unit.x };
+
+  return {
+    x: centre.x + perpendicular.x * bend * side,
+    y: centre.y + perpendicular.y * bend * side,
+  };
 }
 
 function calculate(g) {
@@ -114,6 +153,33 @@ function calculate(g) {
     x: spacerTop.x + Math.cos(stemAngle) * g.stemLength,
     y: spacerTop.y + Math.sin(stemAngle) * g.stemLength,
   };
+  const crankAngle = radians(-32);
+  const drivePedal = {
+    x: bb.x + Math.cos(crankAngle) * g.crankLength,
+    y: bb.y + Math.sin(crankAngle) * g.crankLength,
+  };
+  const farPedal = {
+    x: bb.x - Math.cos(crankAngle) * g.crankLength,
+    y: bb.y - Math.sin(crankAngle) * g.crankLength,
+  };
+  let rider = null;
+  if (g.showRider) {
+    const hip = { x: saddle.x + 8, y: saddle.y + 22 };
+    const torsoAngle = radians(35);
+    const shoulder = {
+      x: hip.x + Math.cos(torsoAngle) * g.torsoLength,
+      y: hip.y + Math.sin(torsoAngle) * g.torsoLength,
+    };
+    const headRadius = Math.max(55, Math.min(90, g.riderHeight * 0.043));
+    const head = { x: shoulder.x - 28, y: shoulder.y + headRadius * 1.55 };
+    const hand = { x: stemEnd.x + 38, y: stemEnd.y - 20 };
+    const upperLeg = g.riderInseam * 0.52;
+    const lowerLeg = g.riderInseam * 0.48;
+    const nearKnee = bentJoint(hip, drivePedal, upperLeg, lowerLeg, 1);
+    const farKnee = bentJoint(hip, farPedal, upperLeg, lowerLeg, 1);
+    const elbow = bentJoint(shoulder, hand, g.armLength * 0.52, g.armLength * 0.48, -1);
+    rider = { hip, shoulder, head, headRadius, hand, elbow, nearKnee, farKnee, drivePedal, farPedal };
+  }
   const reach = g.reach;
   const stack = g.stack;
   const frontCentre = distance(bb, front);
@@ -121,7 +187,7 @@ function calculate(g) {
   const steeringAxisAtGround = headTop.x + (headTop.y + radius) / Math.tan(headAngle);
   const trail = steeringAxisAtGround - front.x;
 
-  return { radius, rear, front, bb, seatTop, saddle, headBottom, headTop, spacerTop, stemEnd, reach, stack, frontCentre, topTube, trail };
+  return { radius, rear, front, bb, seatTop, saddle, headBottom, headTop, spacerTop, stemEnd, drivePedal, farPedal, rider, reach, stack, frontCentre, topTube, trail };
 }
 
 function createMapper(points, radius) {
@@ -232,8 +298,39 @@ function drawSpacerStack(mapper, g, model) {
   }
 }
 
+function drawRider(mapper, rider) {
+  line(layers.rider, mapper, rider.hip, rider.farKnee, "rider-limb rider-far");
+  line(layers.rider, mapper, rider.farKnee, rider.farPedal, "rider-limb rider-far");
+  line(layers.rider, mapper, rider.hip, rider.nearKnee, "rider-limb");
+  line(layers.rider, mapper, rider.nearKnee, rider.drivePedal, "rider-limb");
+  line(layers.rider, mapper, rider.hip, rider.shoulder, "rider-torso");
+  line(layers.rider, mapper, rider.shoulder, rider.elbow, "rider-limb");
+  line(layers.rider, mapper, rider.elbow, rider.hand, "rider-limb");
+
+  const neckBase = { x: rider.shoulder.x - 12, y: rider.shoulder.y + 10 };
+  const neckTop = { x: rider.head.x, y: rider.head.y - rider.headRadius * 0.72 };
+  line(layers.rider, mapper, neckBase, neckTop, "rider-neck");
+  circle(layers.rider, mapper, rider.head, rider.headRadius, "rider-head");
+
+  for (const joint of [rider.hip, rider.nearKnee, rider.farKnee, rider.elbow]) {
+    circle(layers.rider, mapper, joint, 11, "rider-joint");
+  }
+
+  line(layers.rider, mapper, { x: rider.drivePedal.x - 24, y: rider.drivePedal.y }, { x: rider.drivePedal.x + 58, y: rider.drivePedal.y }, "rider-foot");
+  line(layers.rider, mapper, { x: rider.farPedal.x - 24, y: rider.farPedal.y }, { x: rider.farPedal.x + 58, y: rider.farPedal.y }, "rider-foot rider-far");
+}
+
 function drawBike(g, model) {
   const points = [model.rear, model.front, model.bb, model.seatTop, model.saddle, model.headBottom, model.headTop];
+  if (g.showRider) {
+    points.push(
+      model.rider.hip,
+      model.rider.shoulder,
+      model.rider.nearKnee,
+      model.rider.farKnee,
+      { x: model.rider.head.x, y: model.rider.head.y + model.rider.headRadius },
+    );
+  }
   const mapper = createMapper(points, model.radius);
   document.querySelector("#scaleLabel").textContent = `${Math.round(mapper.scale * 100)}% drawing scale`;
 
@@ -244,6 +341,7 @@ function drawBike(g, model) {
 
   drawWheel(mapper, model.rear, model.radius);
   drawWheel(mapper, model.front, model.radius);
+  if (g.showRider) drawRider(mapper, model.rider);
 
   line(layers.bike, mapper, model.rear, model.bb, "frame-tube");
   line(layers.bike, mapper, model.rear, model.seatTop, "frame-tube");
@@ -278,13 +376,8 @@ function drawBike(g, model) {
   line(layers.bike, mapper, { x: model.rear.x, y: 39 }, { x: model.bb.x, y: 98 }, "chain");
   line(layers.bike, mapper, { x: model.rear.x, y: -39 }, { x: model.bb.x, y: -98 }, "chain");
 
-  const crankAngle = -32 * Math.PI / 180;
-  const crankEnd = {
-    x: model.bb.x + Math.cos(crankAngle) * g.crankLength,
-    y: model.bb.y + Math.sin(crankAngle) * g.crankLength,
-  };
-  line(layers.bike, mapper, model.bb, crankEnd, "crank");
-  line(layers.bike, mapper, { x: crankEnd.x - 24, y: crankEnd.y }, { x: crankEnd.x + 30, y: crankEnd.y }, "pedal");
+  line(layers.bike, mapper, model.bb, model.drivePedal, "crank");
+  line(layers.bike, mapper, { x: model.drivePedal.x - 24, y: model.drivePedal.y }, { x: model.drivePedal.x + 30, y: model.drivePedal.y }, "pedal");
 
   for (const [label, point] of [["REAR AXLE", model.rear], ["BB", model.bb], ["FRONT AXLE", model.front]]) {
     text(layers.labels, mapper, { x: point.x, y: point.y - 30 / mapper.scale }, label, "point-label", { "text-anchor": "middle" });
@@ -331,7 +424,12 @@ function render() {
 }
 
 function loadDefaults() {
-  for (const [name, value] of Object.entries(defaults)) form.elements[name].value = value;
+  for (const [name, value] of Object.entries(defaults)) {
+    const input = form.elements[name];
+    if (input.type === "checkbox") input.checked = value;
+    else input.value = value;
+  }
+  for (const name of Object.keys(riderBounds)) form.elements[name].value = "";
   render();
 }
 
