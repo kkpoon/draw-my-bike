@@ -9,7 +9,7 @@
       content="Draw a scaled drive-side bicycle from frame and component geometry."
     />
     <title>Draw My Bike</title>
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./styles.css?v=20260906-rider-ui2" />
   </head>
   <body>
     <header class="topbar">
@@ -123,22 +123,22 @@
               <input id="showRider" name="showRider" type="checkbox" aria-controls="riderMeasurements" aria-expanded="false" />
               <span>Show rider on bike</span>
             </label>
-            <div class="input-grid rider-measurements" id="riderMeasurements" hidden>
+            <div class="input-grid rider-measurements is-disabled" id="riderMeasurements" aria-disabled="true">
               <label>
                 <span>Height</span>
-                <span class="number-field"><input id="riderHeight" name="riderHeight" type="number" inputmode="decimal" min="1200" max="2200" step="1" /><b>mm</b></span>
+                <span class="number-field"><input id="riderHeight" name="riderHeight" type="number" inputmode="decimal" min="1200" max="2200" step="1" disabled /><b>mm</b></span>
               </label>
               <label>
                 <span>Inseam</span>
-                <span class="number-field"><input id="riderInseam" name="riderInseam" type="number" inputmode="decimal" min="500" max="1100" step="1" /><b>mm</b></span>
+                <span class="number-field"><input id="riderInseam" name="riderInseam" type="number" inputmode="decimal" min="500" max="1100" step="1" disabled /><b>mm</b></span>
               </label>
               <label>
                 <span>Torso (hip to shoulder)</span>
-                <span class="number-field"><input id="torsoLength" name="torsoLength" type="number" inputmode="decimal" min="350" max="800" step="1" /><b>mm</b></span>
+                <span class="number-field"><input id="torsoLength" name="torsoLength" type="number" inputmode="decimal" min="350" max="800" step="1" disabled /><b>mm</b></span>
               </label>
               <label>
                 <span>Arm (shoulder to hand)</span>
-                <span class="number-field"><input id="armLength" name="armLength" type="number" inputmode="decimal" min="350" max="850" step="1" /><b>mm</b></span>
+                <span class="number-field"><input id="armLength" name="armLength" type="number" inputmode="decimal" min="350" max="850" step="1" disabled /><b>mm</b></span>
               </label>
             </div>
           </fieldset>
@@ -188,6 +188,6 @@
       </section>
     </main>
 
-    <script src="./app.js"></script>
+    <script src="./app.js?v=20260906-rider-ui2"></script>
   </body>
 </html>
