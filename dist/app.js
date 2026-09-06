@@ -15,6 +15,7 @@ const defaults = Object.freeze({
   stack: 545,
   saddleHeight: 650,
   stemLength: 80,
+  cockpitSpacer: 0,
   stemRise: 6,
   crankLength: 160,
 });
@@ -23,7 +24,7 @@ const bounds = Object.freeze({
   wheelDiameter: [500, 800], wheelbase: [750, 1400], chainstay: [300, 650], bbDrop: [0, 140],
   seatTube: [250, 750], seatAngle: [60, 85], headTube: [60, 300], headAngle: [55, 85],
   reach: [250, 550], stack: [350, 750], saddleHeight: [400, 1000], stemLength: [30, 180],
-  stemRise: [-30, 45], crankLength: [120, 220],
+  cockpitSpacer: [0, 80], stemRise: [-30, 45], crankLength: [120, 220],
 });
 
 const form = document.querySelector("#geometryForm");
@@ -105,9 +106,13 @@ function calculate(g) {
     x: headTop.x + Math.cos(headAngle) * g.headTube,
     y: headTop.y - Math.sin(headAngle) * g.headTube,
   };
+  const spacerTop = {
+    x: headTop.x - Math.cos(headAngle) * g.cockpitSpacer,
+    y: headTop.y + Math.sin(headAngle) * g.cockpitSpacer,
+  };
   const stemEnd = {
-    x: headTop.x + Math.cos(stemAngle) * g.stemLength,
-    y: headTop.y + Math.sin(stemAngle) * g.stemLength,
+    x: spacerTop.x + Math.cos(stemAngle) * g.stemLength,
+    y: spacerTop.y + Math.sin(stemAngle) * g.stemLength,
   };
   const reach = g.reach;
   const stack = g.stack;
@@ -116,7 +121,7 @@ function calculate(g) {
   const steeringAxisAtGround = headTop.x + (headTop.y + radius) / Math.tan(headAngle);
   const trail = steeringAxisAtGround - front.x;
 
-  return { radius, rear, front, bb, seatTop, saddle, headBottom, headTop, stemEnd, reach, stack, frontCentre, topTube, trail };
+  return { radius, rear, front, bb, seatTop, saddle, headBottom, headTop, spacerTop, stemEnd, reach, stack, frontCentre, topTube, trail };
 }
 
 function createMapper(points, radius) {
@@ -201,7 +206,7 @@ function drawDimension(mapper, a, b, label, offset = 0, orientation = "horizonta
 }
 
 function drawBike(g, model) {
-  const points = [model.rear, model.front, model.bb, model.seatTop, model.saddle, model.headBottom, model.headTop, model.stemEnd];
+  const points = [model.rear, model.front, model.bb, model.seatTop, model.saddle, model.headBottom, model.headTop, model.spacerTop, model.stemEnd];
   const mapper = createMapper(points, model.radius);
   document.querySelector("#scaleLabel").textContent = `${Math.round(mapper.scale * 100)}% drawing scale`;
 
@@ -229,7 +234,8 @@ function drawBike(g, model) {
   const saddleFront = { x: model.saddle.x + 55, y: model.saddle.y + 2 };
   line(layers.bike, mapper, saddleRear, saddleFront, "saddle");
 
-  line(layers.bike, mapper, model.headTop, model.stemEnd, "cockpit");
+  if (g.cockpitSpacer > 0) line(layers.bike, mapper, model.headTop, model.spacerTop, "cockpit");
+  line(layers.bike, mapper, model.spacerTop, model.stemEnd, "cockpit");
   const barTop = { x: model.stemEnd.x + 12, y: model.stemEnd.y - 10 };
   const barForward = { x: model.stemEnd.x + 56, y: model.stemEnd.y - 10 };
   line(layers.bike, mapper, barTop, barForward, "handlebar");
