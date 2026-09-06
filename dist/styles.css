@@ -321,6 +321,18 @@ input {
   stroke-linecap: round;
 }
 
+#bikeCanvas .cockpit-spacer {
+  stroke: #202a30;
+  stroke-width: 18;
+  stroke-linecap: butt;
+}
+
+#bikeCanvas .cockpit-spacer-ring {
+  stroke: var(--dimension);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
 #bikeCanvas .saddle {
   stroke: #eef2f4;
   stroke-width: 13;
