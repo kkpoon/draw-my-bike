@@ -84,11 +84,13 @@ function readGeometry() {
   }
 
   geometry.showRider = form.elements.showRider.checked;
-  riderMeasurements.hidden = !geometry.showRider;
+  riderMeasurements.classList.toggle("is-disabled", !geometry.showRider);
+  riderMeasurements.setAttribute("aria-disabled", String(!geometry.showRider));
   form.elements.showRider.setAttribute("aria-expanded", String(geometry.showRider));
 
   for (const [name, [min, max]] of Object.entries(riderBounds)) {
     const input = form.elements[name];
+    input.disabled = !geometry.showRider;
     const value = Number(input.value);
     const fieldValid = !geometry.showRider || (input.value !== "" && Number.isFinite(value) && value >= min && value <= max);
     input.setAttribute("aria-invalid", fieldValid ? "false" : "true");
