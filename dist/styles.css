@@ -198,7 +198,10 @@ legend {
 }
 
 .rider-measurements { margin-top: 14px; }
-.rider-measurements[hidden] { display: none; }
+.rider-measurements.is-disabled {
+  opacity: 0.45;
+  transition: opacity 120ms ease;
+}
 
 label {
   display: grid;
