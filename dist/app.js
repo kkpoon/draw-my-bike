@@ -233,7 +233,7 @@ function drawSpacerStack(mapper, g, model) {
 }
 
 function drawBike(g, model) {
-  const points = [model.rear, model.front, model.bb, model.seatTop, model.saddle, model.headBottom, model.headTop, model.spacerTop, model.stemEnd];
+  const points = [model.rear, model.front, model.bb, model.seatTop, model.saddle, model.headBottom, model.headTop];
   const mapper = createMapper(points, model.radius);
   document.querySelector("#scaleLabel").textContent = `${Math.round(mapper.scale * 100)}% drawing scale`;
 
