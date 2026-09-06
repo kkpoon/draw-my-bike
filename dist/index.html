@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0b0f12" />
+    <meta
+      name="description"
+      content="Draw a scaled drive-side bicycle from frame and component geometry."
+    />
+    <title>Draw My Bike</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="Draw My Bike home">
+        <span class="brand-mark" aria-hidden="true">D/B</span>
+        <span>Draw My Bike</span>
+      </a>
+      <div class="view-label">
+        <span aria-hidden="true"></span>
+        Drive-side view
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="controls" aria-label="Bike geometry controls">
+        <div class="controls-heading">
+          <div>
+            <p class="eyebrow">Geometry inputs</p>
+            <h1>Shape the frame</h1>
+          </div>
+          <button class="reset-button" id="resetButton" type="button">Reset</button>
+        </div>
+
+        <form id="geometryForm" novalidate>
+          <fieldset>
+            <legend>Wheels &amp; chassis</legend>
+            <div class="input-grid">
+              <label>
+                <span>Wheel diameter</span>
+                <span class="number-field"><input id="wheelDiameter" name="wheelDiameter" type="number" inputmode="decimal" min="500" max="800" step="1" /><b>mm</b></span>
+              </label>
+              <label>
+                <span>Wheelbase</span>
+                <span class="number-field"><input id="wheelbase" name="wheelbase" type="number" inputmode="decimal" min="750" max="1400" step="1" /><b>mm</b></span>
+              </label>
+              <label>
+                <span>Chainstay</span>
+                <span class="number-field"><input id="chainstay" name="chainstay" type="number" inputmode="decimal" min="300" max="650" step="1" /><b>mm</b></span>
+              </label>
+              <label>
+                <span>BB drop</span>
+                <span class="number-field"><input id="bbDrop" name="bbDrop" type="number" inputmode="decimal" min="0" max="140" step="1" /><b>mm</b></span>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Frame</legend>
+            <div class="input-grid">
+              <label>
+                <span>Seat tube</span>
+                <span class="number-field"><input id="seatTube" name="seatTube" type="number" inputmode="decimal" min="250" max="750" step="1" /><b>mm</b></span>
+              </label>
+              <label>
+                <span>Seat angle</span>
+                <span class="number-field"><input id="seatAngle" name="seatAngle" type="number" inputmode="decimal" min="60" max="85" step="0.1" /><b>°</b></span>
+              </label>
+              <label>
+                <span>Head tube</span>
+                <span class="number-field"><input id="headTube" name="headTube" type="number" inputmode="decimal" min="60" max="300" step="1" /><b>mm</b></span>
+              </label>
+              <label>
+                <span>Head angle</span>
+                <span class="number-field"><input id="headAngle" name="headAngle" type="number" inputmode="decimal" min="55" max="85" step="0.1" /><b>°</b></span>
+              </label>
+              <label>
+                <span>Reach</span>
+                <span class="number-field"><input id="reach" name="reach" type="number" inputmode="decimal" min="250" max="550" step="1" /><b>mm</b></span>
+              </label>
+              <label>
+                <span>Stack</span>
+                <span class="number-field"><input id="stack" name="stack" type="number" inputmode="decimal" min="350" max="750" step="1" /><b>mm</b></span>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Contact points</legend>
+            <div class="input-grid">
+              <label>
+                <span>Saddle height</span>
+                <span class="number-field"><input id="saddleHeight" name="saddleHeight" type="number" inputmode="decimal" min="400" max="1000" step="1" /><b>mm</b></span>
+              </label>
+              <label>
+                <span>Stem length</span>
+                <span class="number-field"><input id="stemLength" name="stemLength" type="number" inputmode="decimal" min="30" max="180" step="1" /><b>mm</b></span>
+              </label>
+              <label>
+                <span>Stem rise</span>
+                <span class="number-field"><input id="stemRise" name="stemRise" type="number" inputmode="decimal" min="-30" max="45" step="1" /><b>°</b></span>
+              </label>
+              <label>
+                <span>Crank length</span>
+                <span class="number-field"><input id="crankLength" name="crankLength" type="number" inputmode="decimal" min="120" max="220" step="1" /><b>mm</b></span>
+              </label>
+            </div>
+          </fieldset>
+        </form>
+
+        <p class="input-note">Angles are measured from the ground. Reach and stack use the centre of the top headset point.</p>
+      </aside>
+
+      <section class="drawing-panel" aria-labelledby="drawingTitle">
+        <div class="drawing-heading">
+          <div>
+            <p class="eyebrow">Live drawing</p>
+            <h2 id="drawingTitle">Bike profile</h2>
+          </div>
+          <span class="scale-label" id="scaleLabel">Auto fit</span>
+        </div>
+
+        <div class="canvas-wrap">
+          <svg id="bikeCanvas" viewBox="0 0 1200 720" role="img" aria-labelledby="svgTitle svgDescription">
+            <title id="svgTitle">Drive-side bicycle geometry drawing</title>
+            <desc id="svgDescription">A scaled side view of a bicycle that updates with the geometry input fields.</desc>
+            <defs>
+              <marker id="dimensionArrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto-start-reverse">
+                <path d="M 0 0 L 8 4 L 0 8 z" fill="#ffb04a"></path>
+              </marker>
+              <filter id="frameGlow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="3" result="blur"></feGaussianBlur>
+                <feMerge><feMergeNode in="blur"></feMergeNode><feMergeNode in="SourceGraphic"></feMergeNode></feMerge>
+              </filter>
+            </defs>
+            <g id="gridLayer"></g>
+            <g id="dimensionLayer"></g>
+            <g id="bikeLayer"></g>
+            <g id="labelLayer"></g>
+          </svg>
+          <div class="drawing-error" id="drawingError" role="alert" hidden></div>
+        </div>
+
+        <dl class="metrics" aria-label="Calculated geometry">
+          <div><dt>Reach</dt><dd id="metricReach">—</dd></div>
+          <div><dt>Stack</dt><dd id="metricStack">—</dd></div>
+          <div><dt>Front centre</dt><dd id="metricFrontCentre">—</dd></div>
+          <div><dt>Trail</dt><dd id="metricTrail">—</dd></div>
+          <div><dt>Top tube</dt><dd id="metricTopTube">—</dd></div>
+        </dl>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
