@@ -130,7 +130,31 @@ h2 { font-size: clamp(1.35rem, 1.8vw, 1.7rem); }
 .reset-button:hover { border-color: var(--accent); color: var(--text); }
 .reset-button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-form { margin-top: 26px; }
+.preset-card {
+  margin-top: 22px;
+  padding: 12px 14px;
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--line));
+  border-left: 3px solid var(--accent);
+  border-radius: 9px;
+  background: rgba(201, 255, 61, 0.035);
+  display: grid;
+  gap: 3px;
+}
+
+.preset-card span {
+  color: var(--muted);
+  font: 650 0.7rem/1.2 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.preset-card strong {
+  color: var(--text);
+  font-size: 0.88rem;
+  font-weight: 670;
+}
+
+form { margin-top: 18px; }
 
 fieldset {
   margin: 0;
