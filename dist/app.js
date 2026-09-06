@@ -205,6 +205,33 @@ function drawDimension(mapper, a, b, label, offset = 0, orientation = "horizonta
   text(layers.labels, mapper, labelPoint, label, "dimension-text", orientation === "vertical" ? { transform: `rotate(-90 ${mapper.point(labelPoint).x} ${mapper.point(labelPoint).y})` } : {});
 }
 
+function drawSpacerStack(mapper, g, model) {
+  if (g.cockpitSpacer <= 0) return;
+
+  const headAngle = g.headAngle * Math.PI / 180;
+  const steerer = { x: -Math.cos(headAngle), y: Math.sin(headAngle) };
+  const cross = { x: Math.sin(headAngle), y: Math.cos(headAngle) };
+  const bands = Math.max(1, Math.ceil(g.cockpitSpacer / 5));
+
+  line(layers.bike, mapper, model.headTop, model.spacerTop, "cockpit-spacer");
+
+  for (let index = 0; index <= bands; index += 1) {
+    const distance = g.cockpitSpacer * index / bands;
+    const centre = {
+      x: model.headTop.x + steerer.x * distance,
+      y: model.headTop.y + steerer.y * distance,
+    };
+    const halfWidth = 13;
+    line(
+      layers.bike,
+      mapper,
+      { x: centre.x - cross.x * halfWidth, y: centre.y - cross.y * halfWidth },
+      { x: centre.x + cross.x * halfWidth, y: centre.y + cross.y * halfWidth },
+      "cockpit-spacer-ring",
+    );
+  }
+}
+
 function drawBike(g, model) {
   const points = [model.rear, model.front, model.bb, model.seatTop, model.saddle, model.headBottom, model.headTop, model.spacerTop, model.stemEnd];
   const mapper = createMapper(points, model.radius);
@@ -234,7 +261,7 @@ function drawBike(g, model) {
   const saddleFront = { x: model.saddle.x + 55, y: model.saddle.y + 2 };
   line(layers.bike, mapper, saddleRear, saddleFront, "saddle");
 
-  if (g.cockpitSpacer > 0) line(layers.bike, mapper, model.headTop, model.spacerTop, "cockpit");
+  drawSpacerStack(mapper, g, model);
   line(layers.bike, mapper, model.spacerTop, model.stemEnd, "cockpit");
   const barTop = { x: model.stemEnd.x + 12, y: model.stemEnd.y - 10 };
   const barForward = { x: model.stemEnd.x + 56, y: model.stemEnd.y - 10 };
