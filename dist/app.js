@@ -3,20 +3,20 @@
 const NS = "http://www.w3.org/2000/svg";
 
 const defaults = Object.freeze({
-  wheelDiameter: 700,
-  wheelbase: 1005,
-  chainstay: 415,
-  bbDrop: 72,
-  seatTube: 510,
+  wheelDiameter: 686,
+  wheelbase: 1010,
+  chainstay: 420,
+  bbDrop: 74,
+  seatTube: 462,
   seatAngle: 73.5,
-  headTube: 155,
-  headAngle: 73,
-  reach: 376,
-  stack: 579,
-  saddleHeight: 735,
-  stemLength: 100,
+  headTube: 123,
+  headAngle: 71,
+  reach: 386,
+  stack: 545,
+  saddleHeight: 650,
+  stemLength: 80,
   stemRise: 6,
-  crankLength: 170,
+  crankLength: 160,
 });
 
 const bounds = Object.freeze({
