@@ -116,6 +116,32 @@
               </label>
             </div>
           </fieldset>
+
+          <fieldset>
+            <legend>Rider</legend>
+            <label class="toggle-row" for="showRider">
+              <input id="showRider" name="showRider" type="checkbox" aria-controls="riderMeasurements" aria-expanded="false" />
+              <span>Show rider on bike</span>
+            </label>
+            <div class="input-grid rider-measurements" id="riderMeasurements" hidden>
+              <label>
+                <span>Height</span>
+                <span class="number-field"><input id="riderHeight" name="riderHeight" type="number" inputmode="decimal" min="1200" max="2200" step="1" /><b>mm</b></span>
+              </label>
+              <label>
+                <span>Inseam</span>
+                <span class="number-field"><input id="riderInseam" name="riderInseam" type="number" inputmode="decimal" min="500" max="1100" step="1" /><b>mm</b></span>
+              </label>
+              <label>
+                <span>Torso (hip to shoulder)</span>
+                <span class="number-field"><input id="torsoLength" name="torsoLength" type="number" inputmode="decimal" min="350" max="800" step="1" /><b>mm</b></span>
+              </label>
+              <label>
+                <span>Arm (shoulder to hand)</span>
+                <span class="number-field"><input id="armLength" name="armLength" type="number" inputmode="decimal" min="350" max="850" step="1" /><b>mm</b></span>
+              </label>
+            </div>
+          </fieldset>
         </form>
 
         <p class="input-note">Angles are measured from the ground. Reach and stack use the centre of the top headset point.</p>
@@ -145,6 +171,7 @@
             </defs>
             <g id="gridLayer"></g>
             <g id="dimensionLayer"></g>
+            <g id="riderLayer"></g>
             <g id="bikeLayer"></g>
             <g id="labelLayer"></g>
           </svg>
