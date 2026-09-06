@@ -10,6 +10,8 @@ An interactive, dependency-free web app that draws a scaled 2D drive-side bicycl
 - Geometry validation with clear invalid-state feedback
 - Responsive layout for desktop and mobile
 
+The default preset is the Canyon Endurace CF 8 Di2, model year 2027, size XS. Frame and stock component values follow Canyon's published UK geometry table; the displayed 686 mm wheel diameter represents a 622 mm rim with the stock 32 mm tyres.
+
 ## Run locally
 
 Serve the `dist` directory with any static web server, then open its root URL.
