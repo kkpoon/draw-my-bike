@@ -5,7 +5,7 @@ An interactive, dependency-free web app that draws a scaled 2D drive-side bicycl
 ## Features
 
 - Live SVG drawing of the frame, wheels, fork, cockpit and drivetrain
-- Inputs for wheel, chassis, frame and contact-point dimensions
+- Inputs for wheel, chassis, frame and contact-point dimensions, including cockpit spacer height
 - Calculated reach, stack, front centre, trail and top-tube length
 - Geometry validation with clear invalid-state feedback
 - Responsive layout for desktop and mobile
